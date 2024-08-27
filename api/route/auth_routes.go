@@ -32,10 +32,10 @@ func NewLoginRouter(env *bootstrap.Env, timeout time.Duration, db *mongo.Databas
 }
 
 func NewRefreshTokenRouter(env *bootstrap.Env, timeout time.Duration, db *mongo.Database, group *gin.RouterGroup) {
-	// ur := repository.NewUserRepository(*db, entities.CollectionUser)
-	// rtc := &controller.RefreshTokenController{
-	// 	RefreshTokenUsecase: usecase.NewRefreshTokenUsecase(ur, timeout),
-	// 	Env:                 env,
-	// }
-	// group.POST("/token/refresh", rtc.RefreshToken)
+	ur := repository.NewUserRepository(*db, entities.CollectionUser)
+	rtc := &controller.RefreshTokenController{
+		RefreshTokenUsecase: usecase.NewRefreshTokenUsecase(ur, timeout),
+		Env:                 env,
+	}
+	group.POST("/token/refresh", rtc.RefreshToken)
 }
