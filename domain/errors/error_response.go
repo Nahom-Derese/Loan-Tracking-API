@@ -59,6 +59,9 @@ var (
 	ErrTokenNotFound       = errors.New("token not found")
 	ErrErrorUpdatingUser   = errors.New("error updating user")
 	ErrCredentialsNotValid = errors.New("credentials not valid")
+	ErrErrorCreatingLoan   = errors.New("error creating loan")
+	ErrLoanNotFound        = errors.New("loan not found")
+	ErrInvalidLoanAmount   = errors.New("invalid amount of loan")
 )
 
 var errorStatusMap = map[error]int{
@@ -83,6 +86,8 @@ var errorStatusMap = map[error]int{
 	ErrTokenNotFound:                 http.StatusNotFound,
 	ErrErrorUpdatingUser:             http.StatusInternalServerError,
 	ErrCredentialsNotValid:           http.StatusUnauthorized,
+	ErrErrorCreatingLoan:             http.StatusInternalServerError,
+	ErrLoanNotFound:                  http.StatusInternalServerError,
 }
 
 func MapErrorToStatusCode(err error) int {
