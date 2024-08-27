@@ -4,16 +4,18 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"time"
 
 	b64 "encoding/base64"
 
-	"github.com/Nahom-Derese/Loan-Tracking-API/api/middleware"
 	"github.com/Nahom-Derese/Loan-Tracking-API/bootstrap"
 	"github.com/Nahom-Derese/Loan-Tracking-API/domain/entities"
 	custom_error "github.com/Nahom-Derese/Loan-Tracking-API/domain/errors"
+	"github.com/Nahom-Derese/Loan-Tracking-API/domain/forms"
 	tokenutil "github.com/Nahom-Derese/Loan-Tracking-API/internal/auth"
+	error_handler "github.com/Nahom-Derese/Loan-Tracking-API/internal/error"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -53,7 +55,7 @@ func (sc *SignupController) VerifyEmail(c *gin.Context) {
 		return
 	}
 
-	err = sc.SignupUsecase.ActivateUser(context.TODO(), userID)
+	err = sc.SignupUsecase.ActivateUser(c.Request.Context(), userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, custom_error.ErrMessage(err))
 		return
@@ -61,8 +63,8 @@ func (sc *SignupController) VerifyEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
 
 }
-func (sc *SignupController) Signup(c *gin.Context) {
-	var request entities.SignupRequest
+func (sc *SignupController) Register(c *gin.Context) {
+	var request forms.RegisterUserForm
 
 	err := c.ShouldBindJSON(&request)
 	if err != nil {
@@ -70,7 +72,13 @@ func (sc *SignupController) Signup(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, custom_error.ErrMessage(custom_error.EreInvalidRequestBody))
 			return
 		}
-		middleware.CustomErrorResponse(c, err)
+		error_handler.CustomErrorResponse(c, err)
+		return
+	}
+
+	if err := request.Validate(); err != nil {
+		errorMessages := error_handler.TranslateError(err)
+		c.JSON(http.StatusBadRequest, gin.H{"errors": errorMessages})
 		return
 	}
 
@@ -85,13 +93,11 @@ func (sc *SignupController) Signup(c *gin.Context) {
 		bcrypt.DefaultCost,
 	)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, custom_error.ErrMessage(err))
+		c.Error(err)
 		return
 	}
 
 	request.Password = string(encryptedPassword)
-
-	var role string
 
 	user := entities.User{
 		ID:        primitive.NewObjectID(),
@@ -100,9 +106,18 @@ func (sc *SignupController) Signup(c *gin.Context) {
 		Email:     request.Email,
 		Password:  request.Password,
 		Active:    false,
-		Role:      role,
+		Role:      "user",
+		Phone:     request.Phone,
+		Address:   request.Address,
 		CreatedAt: time.Now().Unix(),
 		UpdatedAt: time.Now().Unix(),
+	}
+
+	if err := request.Validate(); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"errors": error_handler.TranslateError(err)})
+		errorMessages := error_handler.TranslateError(err)
+		log.Println(errorMessages)
+		return
 	}
 
 	VerificationToken, err := sc.SignupUsecase.CreateVerificationToken(&user, sc.Env.VerificationTokenSecret, sc.Env.VerificationTokenExpiryMin)

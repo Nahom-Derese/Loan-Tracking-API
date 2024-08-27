@@ -32,7 +32,6 @@ func JwtAuthMiddleware(secret string) gin.HandlerFunc {
 		}
 		c.Set("x-user-id", claims["id"])
 		c.Set("x-user-role", claims["role"])
-		c.Set("x-user-owner", claims["is_owner"])
 		c.Next()
 	}
 }

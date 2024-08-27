@@ -18,7 +18,7 @@ func NewSignupRouter(env *bootstrap.Env, timeout time.Duration, db *mongo.Databa
 		SignupUsecase: usecase.NewSignupUsecase(ur, timeout),
 		Env:           env,
 	}
-	group.POST("/signup", sc.Signup)
+	group.POST("/register", sc.Register)
 	group.GET("/verify-email/:token", sc.VerifyEmail)
 }
 
@@ -37,5 +37,5 @@ func NewRefreshTokenRouter(env *bootstrap.Env, timeout time.Duration, db *mongo.
 	// 	RefreshTokenUsecase: usecase.NewRefreshTokenUsecase(ur, timeout),
 	// 	Env:                 env,
 	// }
-	// group.POST("/refresh", rtc.RefreshToken)
+	// group.POST("/token/refresh", rtc.RefreshToken)
 }
