@@ -12,7 +12,7 @@ import (
 func Setup(env *bootstrap.Env, timeout time.Duration, db *mongo.Database, gin *gin.Engine) {
 
 	// Logging
-	gin.Use(middleware.RequestLogger())
+	// gin.Use(middleware.RequestLogger())
 
 	// Error handling
 	gin.Use(middleware.ErrorHandlerMiddleware())
@@ -23,7 +23,7 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *mongo.Database, gin *g
 	NewSignupRouter(env, timeout, db, usersRouter)
 	NewLoginRouter(env, timeout, db, usersRouter)
 	NewRefreshTokenRouter(env, timeout, db, usersRouter)
-	NewPublicResetPasswordRouter(env, timeout, db, usersRouter)
+	NewResetPasswordRouter(env, timeout, db, usersRouter)
 
 	protectedUserRouter := gin.Group("users")
 	protectedUserRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
@@ -34,5 +34,5 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *mongo.Database, gin *g
 	adminRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 	adminRouter.Use(middleware.AdminMiddleware())
 
-	// NewLoansRouter(env, timeout, db, protectedRouter)
+	NewProfileRouter(env, timeout, db, adminRouter)
 }

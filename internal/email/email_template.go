@@ -2,7 +2,7 @@ package emailutil
 
 import "fmt"
 
-func Emailtemplate(url string) string {
+func EmailVerificationtemplate(url string) string {
 	return fmt.Sprintf(
 		`<html>
     <head>

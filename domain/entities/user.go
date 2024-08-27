@@ -69,6 +69,7 @@ type UserUsecase interface {
 
 type UserRepository interface {
 	GetUsers(c context.Context, filter bson.M, userFilter UserFilter) (*[]User, mongopagination.PaginationData, error)
+	GetAllUsers(c context.Context) ([]User, error)
 	GetUserByEmail(c context.Context, email string) (*User, error)
 	GetUserById(c context.Context, userId string) (*User, error)
 	CreateUser(c context.Context, user *User) (*User, error)
