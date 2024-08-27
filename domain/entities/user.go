@@ -27,7 +27,6 @@ type User struct {
 	Role            string             `bson:"role" json:"role" validate:"required,oneof=user admin"`
 	TotalLoanAmount float64            `bson:"total_loan_amount" json:"totalLoanAmount" validate:"gte=0"`
 	OutstandingDebt float64            `bson:"outstanding_debt" json:"outstandingDebt" validate:"gte=0"`
-	Loans           []Loan             `bson:"loans" json:"loans"`
 	CreatedAt       primitive.DateTime `bson:"created_at" json:"createdAt"`
 	UpdatedAt       primitive.DateTime `bson:"updated_at" json:"updatedAt"`
 }
@@ -56,6 +55,7 @@ type UserUsecase interface {
 	GetUserById(c context.Context, userId string) (*User, error)
 	GetUsers(c context.Context, filter UserFilter) (*[]User, mongopagination.PaginationData, error)
 	UpdateUser(c context.Context, userID string, updatedUser *forms.UpdateUserForm) (*User, error)
+	UpdateUserLoan(c context.Context, userID string, amount float64) error
 	DeleteUser(c context.Context, userID string) error
 	IsUserActive(c context.Context, userID string) (bool, error)
 	UpdateUserPassword(c context.Context, userID string, updatePassword *forms.UpdatePasswordForm) error
@@ -76,6 +76,7 @@ type UserRepository interface {
 	UpdateUser(c context.Context, userID string, updatedUser *forms.UpdateUserForm) (*User, error)
 	UpdateRefreshToken(c context.Context, userID string, refreshToken string) error
 	UpdateLastLogin(c context.Context, userID string) error
+	UpdateLoanAmount(c context.Context, userID string, amount float64) error
 	ActivateUser(c context.Context, userID string) error
 	DeleteUser(c context.Context, userID string) error
 	IsUserActive(c context.Context, userID string) (bool, error)
