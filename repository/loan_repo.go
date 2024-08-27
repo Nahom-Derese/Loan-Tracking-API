@@ -44,6 +44,41 @@ func (lr *loanRepository) CreateLoan(ctx context.Context, loan *entities.Loan) (
 	return &insertedLoan, nil
 }
 
+// CreateLoan inserts a new loan into the database.
+func (lr *loanRepository) AcceptLoan(ctx context.Context, loanID string) error {
+	collection := lr.database.Collection(lr.collectionName)
+
+	id, err := primitive.ObjectIDFromHex(loanID)
+	if err != nil {
+		return custom_error.ErrInvalidID
+	}
+
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": bson.M{"status": "approved"}}
+
+	_, err = collection.UpdateOne(ctx, filter, update)
+
+	return err
+}
+
+// CreateLoan inserts a new loan into the database.
+func (lr *loanRepository) RejectLoan(ctx context.Context, loanID string) error {
+
+	collection := lr.database.Collection(lr.collectionName)
+
+	id, err := primitive.ObjectIDFromHex(loanID)
+	if err != nil {
+		return custom_error.ErrInvalidID
+	}
+
+	filter := bson.M{"_id": id}
+	update := bson.M{"$set": bson.M{"status": "rejected"}}
+
+	_, err = collection.UpdateOne(ctx, filter, update)
+
+	return err
+}
+
 // GetLoanByID retrieves a loan by its ID from the database.
 func (lr *loanRepository) GetLoanByID(ctx context.Context, loanID string) (*entities.Loan, error) {
 	collection := lr.database.Collection(lr.collectionName)

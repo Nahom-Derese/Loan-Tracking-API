@@ -97,6 +97,22 @@ func (ur *userRepository) UpdateLastLogin(c context.Context, userID string) erro
 	return err
 }
 
+func (ur *userRepository) UpdateLoanAmount(c context.Context, userID string, amount float64) error {
+	collection := ur.database.Collection(ur.collectionName)
+	id, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return custom_error.ErrInvalidID
+	}
+	filter := bson.M{"_id": id}
+	_, err = collection.UpdateOne(c, filter, bson.M{"$set": bson.M{"outstanding_debt": amount, "total_loan_amount": amount}})
+
+	if err != nil {
+		return custom_error.ErrErrorUpdatingUser
+	}
+
+	return err
+}
+
 func (ur *userRepository) GetUserById(c context.Context, userId string) (*entities.User, error) {
 	collection := ur.database.Collection(ur.collectionName)
 	var user entities.User
