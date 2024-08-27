@@ -50,4 +50,10 @@ var (
 
 	ErrRateLimitExceeded         = errors.New("rate limit exceeded")
 	ErrErrorSendingReminderEmail = errors.New("error sending reminder email")
+
+	ErrInvalidID           = errors.New("invalid id")
+	ErrFilteringUsers      = errors.New("error filtering users")
+	ErrTokenNotFound       = errors.New("token not found")
+	ErrErrorUpdatingUser   = errors.New("error updating user")
+	ErrCredentialsNotValid = errors.New("credentials not valid")
 )
