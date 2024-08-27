@@ -175,7 +175,7 @@ func (ur *userRepository) RevokeRefreshToken(c context.Context, userID, refreshT
 	return nil
 }
 
-func (ur *userRepository) UpdateUser(c context.Context, userID string, updatedUser *forms.RegisterUserForm) (*entities.User, error) {
+func (ur *userRepository) UpdateUser(c context.Context, userID string, updatedUser *forms.UpdateUserForm) (*entities.User, error) {
 	collection := ur.database.Collection(ur.collectionName)
 	id, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
@@ -195,25 +195,22 @@ func (ur *userRepository) UpdateUser(c context.Context, userID string, updatedUs
 	return &ResultUser, nil
 }
 
-func (ur *userRepository) ActivateUser(c context.Context, userID string) (*entities.User, error) {
+func (ur *userRepository) ActivateUser(c context.Context, userID string) error {
 	collection := ur.database.Collection(ur.collectionName)
 	id, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
-		return nil, custom_error.ErrInvalidID
+		return custom_error.ErrInvalidID
 	}
 	filter := bson.M{"_id": id}
-	update := bson.M{"$set": bson.M{"is_active": true}}
+	update := bson.M{"$set": bson.M{"active": true}}
 
-	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
+	result := collection.FindOneAndUpdate(c, filter, update)
 
-	var ResultUser entities.User
-	err = collection.FindOneAndUpdate(c, filter, update, opts).Decode(&ResultUser)
-
-	if err != nil {
-		return nil, custom_error.ErrErrorUpdatingUser
+	if result.Err() != nil {
+		return custom_error.ErrErrorUpdatingUser
 	}
 
-	return &ResultUser, nil
+	return nil
 }
 
 func (ur *userRepository) DeleteUser(c context.Context, userID string) error {
@@ -261,14 +258,14 @@ func (ur *userRepository) ResetUserPassword(c context.Context, userID string, re
 	}
 	return nil
 }
-func (ur *userRepository) UpdateUserPassword(c context.Context, userID string, updatePassword *forms.UpdatePasswordForm) error {
+func (ur *userRepository) UpdateUserPassword(c context.Context, userID string, updatePassword string) error {
 	collection := ur.database.Collection(ur.collectionName)
 	ObjID, err := primitive.ObjectIDFromHex(userID)
 	if err != nil {
 		return custom_error.ErrInvalidID
 	}
 
-	res, err := collection.UpdateOne(c, bson.M{"_id": ObjID}, bson.M{"$set": bson.M{"password": updatePassword.NewPassword}})
+	res, err := collection.UpdateOne(c, bson.M{"_id": ObjID}, bson.M{"$set": bson.M{"password": updatePassword}})
 	if res.MatchedCount < 1 {
 		return custom_error.ErrUserNotFound
 	}
