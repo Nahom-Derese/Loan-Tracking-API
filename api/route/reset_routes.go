@@ -14,6 +14,6 @@ func NewPublicResetPasswordRouter(env *bootstrap.Env, timeout time.Duration, db 
 	// 	ResetPasswordUsecase: usecase.NewResetPasswordUsecase(ur, timeout),
 	// 	Env:                  env,
 	// }
-	// group.POST("/forgot-password", sc.ForgotPassword)
-	// group.POST("/reset-password", sc.ResetPassword)
+	// group.POST("/password-update", sc.ResetPassword)
+	// group.POST("/password-reset", sc.ForgotPassword)
 }
