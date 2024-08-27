@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/Nahom-Derese/Loan-Tracking-API/bootstrap"
 	"github.com/Nahom-Derese/Loan-Tracking-API/domain/forms"
 	mongopagination "github.com/gobeam/mongo-go-pagination"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,7 +21,7 @@ type User struct {
 	LastName        string             `bson:"last_name" json:"lastName" validate:"required,min=2,max=100"`
 	Email           string             `bson:"email" json:"email" validate:"required,email"`
 	Password        string             `bson:"password" json:"-" validate:"required,min=6"`
-	Phone           string             `bson:"phone" json:"phone" validate:"required,e164"`
+	Phone           string             `bson:"phone" json:"phone" validate:"required,e164,min=10,max=13"`
 	Address         string             `bson:"address" json:"address" validate:"required,min=5,max=200"`
 	Active          bool               `bson:"active" json:"active"`
 	Role            string             `bson:"role" json:"role" validate:"required,oneof=user admin"`
@@ -29,6 +30,11 @@ type User struct {
 	Loans           []Loan             `bson:"loans" json:"loans"`
 	CreatedAt       int64              `bson:"created_at" json:"createdAt"`
 	UpdatedAt       int64              `bson:"updated_at" json:"updatedAt"`
+}
+
+func (u *User) Validate() error {
+	validate := bootstrap.GetValidator()
+	return validate.Struct(u)
 }
 
 type UserFilter struct {
@@ -48,13 +54,12 @@ type UserUsecase interface {
 	CreateUser(c context.Context, user *User) (*User, error)
 	GetUserByEmail(c context.Context, email string) (*User, error)
 	GetUserById(c context.Context, userId string) (*User, error)
-
 	GetUsers(c context.Context, filter UserFilter) (*[]User, mongopagination.PaginationData, error)
-	UpdateUser(c context.Context, userID string, updatedUser *forms.RegisterUserForm) (*User, error)
-	ActivateUser(c context.Context, userID string) error
+	UpdateUser(c context.Context, userID string, updatedUser *forms.UpdateUserForm) (*User, error)
 	DeleteUser(c context.Context, userID string) error
 	IsUserActive(c context.Context, userID string) (bool, error)
 	UpdateUserPassword(c context.Context, userID string, updatePassword *forms.UpdatePasswordForm) error
+	ResetUserPassword(c context.Context, userID string, updatePassword *forms.ResetPasswordForm) error
 
 	// IsOwner(c context.Context) (bool, error)
 	// UpdateProfilePicture(c context.Context, userID string, filename string) error
@@ -67,14 +72,14 @@ type UserRepository interface {
 	GetUserByEmail(c context.Context, email string) (*User, error)
 	GetUserById(c context.Context, userId string) (*User, error)
 	CreateUser(c context.Context, user *User) (*User, error)
-	UpdateUser(c context.Context, userID string, updatedUser *forms.RegisterUserForm) (*User, error)
+	UpdateUser(c context.Context, userID string, updatedUser *forms.UpdateUserForm) (*User, error)
 	UpdateRefreshToken(c context.Context, userID string, refreshToken string) error
 	UpdateLastLogin(c context.Context, userID string) error
-	ActivateUser(c context.Context, userID string) (*User, error)
+	ActivateUser(c context.Context, userID string) error
 	DeleteUser(c context.Context, userID string) error
 	IsUserActive(c context.Context, userID string) (bool, error)
 	RevokeRefreshToken(c context.Context, userID, refreshToken string) error
-	UpdateUserPassword(c context.Context, userID string, updatePassword *forms.UpdatePasswordForm) error
+	UpdateUserPassword(c context.Context, userID string, newPassword string) error
 
 	// UpdateProfilePicture(c context.Context, userID string, filename string) error
 	// PromoteUserToAdmin(c context.Context, userID string) error
