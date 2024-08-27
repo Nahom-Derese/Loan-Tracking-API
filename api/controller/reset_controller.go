@@ -11,6 +11,7 @@ import (
 	"github.com/Nahom-Derese/Loan-Tracking-API/domain/forms"
 	tokenutil "github.com/Nahom-Derese/Loan-Tracking-API/internal/auth"
 	error_handler "github.com/Nahom-Derese/Loan-Tracking-API/internal/error"
+	"github.com/Nahom-Derese/Loan-Tracking-API/internal/logger"
 	"github.com/gin-gonic/gin"
 )
 
@@ -69,12 +70,22 @@ func (rc *ResetPasswordController) ResetPassword(c *gin.Context) {
 	user, err := rc.ResetPasswordUsecase.GetUserById(c.Request.Context(), userID)
 
 	if err != nil {
+		// Log failed login attempt
+		if err := logger.ResetPasswordAttempt(user.Email, false); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to log event"})
+			return
+		}
 		c.JSON(http.StatusInternalServerError, custom_error.ErrMessage(err))
 		return
 	}
 
 	err = c.ShouldBindJSON(&request)
 	if err != nil {
+		// Log failed login attempt
+		if err := logger.ResetPasswordAttempt(user.Email, false); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to log event"})
+			return
+		}
 		if err == io.EOF {
 			c.JSON(http.StatusBadRequest, custom_error.ErrMessage(custom_error.EreInvalidRequestBody))
 			return
@@ -84,6 +95,11 @@ func (rc *ResetPasswordController) ResetPassword(c *gin.Context) {
 	}
 
 	if err := request.Validate(); err != nil {
+		// Log failed login attempt
+		if err := logger.ResetPasswordAttempt(user.Email, false); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to log event"})
+			return
+		}
 		errorMessages := error_handler.TranslateError(err)
 		c.JSON(http.StatusBadRequest, gin.H{"errors": errorMessages})
 		return
@@ -92,7 +108,18 @@ func (rc *ResetPasswordController) ResetPassword(c *gin.Context) {
 	err = rc.ResetPasswordUsecase.ResetPassword(c.Request.Context(), user.ID.Hex(), &request)
 
 	if err != nil {
+		// Log failed login attempt
+		if err := logger.ResetPasswordAttempt(user.Email, false); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to log event"})
+			return
+		}
 		c.Error(err)
+		return
+	}
+
+	// Logging
+	if err := logger.ResetPasswordAttempt(user.Email, true); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to log event"})
 		return
 	}
 
