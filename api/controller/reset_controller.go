@@ -2,6 +2,7 @@ package controller
 
 import (
 	b64 "encoding/base64"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -62,6 +63,10 @@ func (rc *ResetPasswordController) ResetPassword(c *gin.Context) {
 
 	claims, err := tokenutil.ExtractUserClaimsFromToken(string(decodedToken), rc.Env.VerificationTokenSecret)
 	userID := claims["id"].(string)
+
+	fmt.Println()
+	fmt.Println(userID)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, custom_error.ErrMessage(err))
 		return

@@ -41,6 +41,10 @@ func (sc *SignupController) VerifyEmail(c *gin.Context) {
 
 	claims, err := tokenutil.ExtractUserClaimsFromToken(string(decodedToken), sc.Env.VerificationTokenSecret)
 	userID := claims["id"].(string)
+
+	fmt.Println("userID")
+	fmt.Println(userID)
+
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, custom_error.ErrMessage(err))
 		return
@@ -122,11 +126,11 @@ func (sc *SignupController) Register(c *gin.Context) {
 		Role:      role,
 		Phone:     request.Phone,
 		Address:   request.Address,
-		CreatedAt: time.Now().Unix(),
-		UpdatedAt: time.Now().Unix(),
+		CreatedAt: primitive.NewDateTimeFromTime(time.Now()),
+		UpdatedAt: primitive.NewDateTimeFromTime(time.Now()),
 	}
 
-	if err := request.Validate(); err != nil {
+	if err := user.Validate(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"errors": error_handler.TranslateError(err)})
 		errorMessages := error_handler.TranslateError(err)
 		log.Println(errorMessages)

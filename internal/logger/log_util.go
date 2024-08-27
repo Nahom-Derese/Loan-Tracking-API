@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-var logFilePath = filepath.Join("..", "..", "logs", "app.log")
-var logFolder = filepath.Join("..", "..", "logs")
+var logFilePath = filepath.Join("logs", "app.log")
+var logFolder = filepath.Join("logs")
 
 func init() {
 	// Ensure the logs directory exists

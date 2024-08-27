@@ -28,8 +28,8 @@ type User struct {
 	TotalLoanAmount float64            `bson:"total_loan_amount" json:"totalLoanAmount" validate:"gte=0"`
 	OutstandingDebt float64            `bson:"outstanding_debt" json:"outstandingDebt" validate:"gte=0"`
 	Loans           []Loan             `bson:"loans" json:"loans"`
-	CreatedAt       int64              `bson:"created_at" json:"createdAt"`
-	UpdatedAt       int64              `bson:"updated_at" json:"updatedAt"`
+	CreatedAt       primitive.DateTime `bson:"created_at" json:"createdAt"`
+	UpdatedAt       primitive.DateTime `bson:"updated_at" json:"updatedAt"`
 }
 
 func (u *User) Validate() error {

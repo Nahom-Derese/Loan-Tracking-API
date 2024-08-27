@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -10,7 +11,9 @@ import (
 
 // AdminLogsHandler allows the admin to view application logs
 func AdminLogsHandler(c *gin.Context) {
-	var logFilePath = filepath.Join("..", "..", "logs", "app.log")
+	var logFilePath = filepath.Join("logs", "app.log")
+
+	fmt.Println(logFilePath)
 
 	// Read the log file
 	logs, err := os.ReadFile(logFilePath)

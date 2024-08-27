@@ -9,5 +9,5 @@ import (
 )
 
 func NewLogRouter(env *bootstrap.Env, timeout time.Duration, group *gin.RouterGroup) {
-	group.POST("/logs", controller.AdminLogsHandler)
+	group.GET("/logs", controller.AdminLogsHandler)
 }
