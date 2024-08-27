@@ -48,7 +48,18 @@ func LogLoginAttempt(username string, success bool) error {
 	if success {
 		status = "SUCCESSFUL"
 	}
-	details := fmt.Sprintf("Username: %s, Status: %s", username, status)
+	details := fmt.Sprintf("Email: %s, Status: %s", username, status)
+
+	return logEvent(event, details)
+}
+
+func ResetPasswordAttempt(username string, success bool) error {
+	event := "Password Reset Attempt"
+	status := "FAILED"
+	if success {
+		status = "SUCCESSFUL"
+	}
+	details := fmt.Sprintf("Email: %s, Status: %s", username, status)
 
 	return logEvent(event, details)
 }
