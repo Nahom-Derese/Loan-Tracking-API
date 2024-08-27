@@ -31,5 +31,9 @@ func main() {
 	route.Setup(env, timeout, db, gin)
 
 	// Run the server
-	gin.Run(env.ServerAddress)
+	err := gin.Run(env.ServerAddress[7:])
+
+	if err != nil {
+		panic(err)
+	}
 }
