@@ -7,25 +7,26 @@ import (
 )
 
 type Env struct {
-	AppEnv                     string `mapstructure:"APP_ENV"`
-	ServerAddress              string `mapstructure:"SERVER_ADDRESS"`
-	ContextTimeout             int    `mapstructure:"CONTEXT_TIMEOUT"`
-	DBHost                     string `mapstructure:"DB_HOST"`
-	DBPort                     string `mapstructure:"DB_PORT"`
-	DBUser                     string `mapstructure:"DB_USER"`
-	DBPass                     string `mapstructure:"DB_PASS"`
-	DBName                     string `mapstructure:"DB_NAME"`
-	AccessTokenExpiryHour      int    `mapstructure:"ACCESS_TOKEN_EXPIRY_HOUR"`
-	RefreshTokenExpiryHour     int    `mapstructure:"REFRESH_TOKEN_EXPIRY_HOUR"`
-	AccessTokenSecret          string `mapstructure:"ACCESS_TOKEN_SECRET"`
-	VerificationTokenExpiryMin int    `mapstructure:"VERIFICATION_TOKEN_EXPIRY_MIN"`
-	VerificationTokenSecret    string `mapstructure:"VERIFICATION_TOKEN_SECRET"`
-	RefreshTokenSecret         string `mapstructure:"REFRESH_TOKEN_SECRET"`
-	SenderEmail                string `mapstructure:"SENDER_EMAIL"`
-	SmtpPort                   string `mapstructure:"SMTP_PORT"`
-	SmtpHost                   string `mapstructure:"SMTP_HOST"`
-	SenderPassword             string `mapstructure:"SENDER_PASSWORD"`
-	PassResetCodeExpirationMin int    `mapstructure:"PASS_RESET_CODE_EXPIRATION_MIN"`
+	AppEnv                     string  `mapstructure:"APP_ENV"`
+	ServerAddress              string  `mapstructure:"SERVER_ADDRESS"`
+	ContextTimeout             int     `mapstructure:"CONTEXT_TIMEOUT"`
+	DBHost                     string  `mapstructure:"DB_HOST"`
+	DBPort                     string  `mapstructure:"DB_PORT"`
+	DBUser                     string  `mapstructure:"DB_USER"`
+	DBPass                     string  `mapstructure:"DB_PASS"`
+	DBName                     string  `mapstructure:"DB_NAME"`
+	AccessTokenExpiryHour      int     `mapstructure:"ACCESS_TOKEN_EXPIRY_HOUR"`
+	RefreshTokenExpiryHour     int     `mapstructure:"REFRESH_TOKEN_EXPIRY_HOUR"`
+	AccessTokenSecret          string  `mapstructure:"ACCESS_TOKEN_SECRET"`
+	VerificationTokenExpiryMin int     `mapstructure:"VERIFICATION_TOKEN_EXPIRY_MIN"`
+	VerificationTokenSecret    string  `mapstructure:"VERIFICATION_TOKEN_SECRET"`
+	RefreshTokenSecret         string  `mapstructure:"REFRESH_TOKEN_SECRET"`
+	SenderEmail                string  `mapstructure:"SENDER_EMAIL"`
+	SmtpPort                   string  `mapstructure:"SMTP_PORT"`
+	SmtpHost                   string  `mapstructure:"SMTP_HOST"`
+	SenderPassword             string  `mapstructure:"SENDER_PASSWORD"`
+	PassResetCodeExpirationMin int     `mapstructure:"PASS_RESET_CODE_EXPIRATION_MIN"`
+	InterestRate               float64 `mapstructure:"INTEREST_RATE"`
 }
 
 func NewEnv() *Env {

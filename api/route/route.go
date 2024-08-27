@@ -27,10 +27,15 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *mongo.Database, gin *g
 
 	NewProfileRouter(env, timeout, db, protectedUserRouter)
 
+	protectedLoanRouter := gin.Group("loans")
+	protectedLoanRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
+	NewLoanRouter(env, timeout, db, protectedLoanRouter)
+
 	adminRouter := gin.Group("admin")
 	adminRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 	adminRouter.Use(middleware.AdminMiddleware())
 
 	NewProfileRouter(env, timeout, db, adminRouter)
 	NewLogRouter(env, timeout, adminRouter)
+	NewAdminLoanRouter(env, timeout, db, adminRouter)
 }
