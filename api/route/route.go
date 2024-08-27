@@ -11,9 +11,6 @@ import (
 
 func Setup(env *bootstrap.Env, timeout time.Duration, db *mongo.Database, gin *gin.Engine) {
 
-	// Logging
-	// gin.Use(middleware.RequestLogger())
-
 	// Error handling
 	gin.Use(middleware.ErrorHandlerMiddleware())
 
@@ -35,4 +32,5 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *mongo.Database, gin *g
 	adminRouter.Use(middleware.AdminMiddleware())
 
 	NewProfileRouter(env, timeout, db, adminRouter)
+	NewLogRouter(env, timeout, adminRouter)
 }
