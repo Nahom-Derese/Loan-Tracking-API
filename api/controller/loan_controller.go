@@ -25,22 +25,23 @@ type loansController interface {
 // LoanController is a struct to hold the usecase and env
 type LoanController struct {
 	LoanUseCase entities.LoanUseCase
+	UserUseCase entities.UserUsecase
 	Env         *bootstrap.Env
 }
 
-func (pc *LoanController) GetLoan() gin.HandlerFunc {
+func (lc *LoanController) GetLoan() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		claimUserID := c.MustGet("x-user-id").(string)
 		role := c.MustGet("x-user-role").(string)
 
-		loan, err := pc.LoanUseCase.GetLoanByID(c, id)
+		loan, err := lc.LoanUseCase.GetLoanByID(c, id)
 		if err != nil {
 			c.Error(err)
 			return
 		}
 		if claimUserID != loan.UserID.Hex() && role != "admin" {
-			c.JSON(http.StatusUnauthorized, custom_error.ErrorMessage{Message: "unauthorized"})
+			c.JSON(http.StatusUnauthorized, custom_error.ErrMessage(custom_error.ErrUnauthorized))
 			return
 		}
 
@@ -48,7 +49,7 @@ func (pc *LoanController) GetLoan() gin.HandlerFunc {
 	}
 }
 
-func (pc *LoanController) GetLoans() gin.HandlerFunc {
+func (lc *LoanController) GetLoans() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var page int64 = 1
@@ -64,7 +65,7 @@ func (pc *LoanController) GetLoans() gin.HandlerFunc {
 			limit = in_limit
 		}
 
-		loans, pagination, err := pc.LoanUseCase.GetLoans(c.Request.Context(), limit, page)
+		loans, pagination, err := lc.LoanUseCase.GetLoans(c.Request.Context(), limit, page)
 
 		if err != nil {
 			c.Error(err)
@@ -79,7 +80,7 @@ func (pc *LoanController) GetLoans() gin.HandlerFunc {
 		c.JSON(http.StatusOK, res)
 	}
 }
-func (pc *LoanController) ApplyLoan() gin.HandlerFunc {
+func (lc *LoanController) ApplyLoan() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claimUserID := c.MustGet("x-user-id").(string)
 
@@ -99,10 +100,19 @@ func (pc *LoanController) ApplyLoan() gin.HandlerFunc {
 			return
 		}
 
+		layout := "2006-01-02"
+
+		parsedDate, err := time.Parse(layout, request.DueDate)
+
+		if err != nil {
+			c.JSON(http.StatusBadRequest, custom_error.ErrMessage(custom_error.ErrInvalidDate))
+			return
+		}
+
 		userID, err := primitive.ObjectIDFromHex(claimUserID)
 
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"errors": err})
+			c.JSON(http.StatusBadRequest, custom_error.ErrMessage(custom_error.ErrInvalidID))
 			return
 		}
 
@@ -110,13 +120,21 @@ func (pc *LoanController) ApplyLoan() gin.HandlerFunc {
 			LoanID:       primitive.NewObjectID(),
 			UserID:       userID,
 			Amount:       request.Amount,
-			InterestRate: request.InterestRate,
-			Term:         request.Term,
+			InterestRate: lc.Env.InterestRate,
+			Purpose:      request.Purpose,
 			StartDate:    primitive.NewDateTimeFromTime(time.Now()),
-			DueDate:      primitive.NewDateTimeFromTime(time.Now()),
+			DueDate:      primitive.NewDateTimeFromTime(parsedDate),
+			Status:       "pending",
 		}
 
-		newLoan, err := pc.LoanUseCase.CreateLoan(c, &loan)
+		err = lc.UserUseCase.UpdateUserLoan(c, claimUserID, loan.Amount)
+
+		if err != nil {
+			c.Error(err)
+			return
+		}
+
+		newLoan, err := lc.LoanUseCase.CreateLoan(c, &loan)
 		if err != nil {
 			c.Error(err)
 			return
@@ -126,11 +144,11 @@ func (pc *LoanController) ApplyLoan() gin.HandlerFunc {
 	}
 }
 
-func (pc *LoanController) DeleteLoan() gin.HandlerFunc {
+func (lc *LoanController) DeleteLoan() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		loanID := c.Param("id")
 
-		err := pc.LoanUseCase.DeleteLoan(c, loanID)
+		err := lc.LoanUseCase.DeleteLoan(c, loanID)
 
 		if err != nil {
 			c.Error(err)
@@ -138,5 +156,36 @@ func (pc *LoanController) DeleteLoan() gin.HandlerFunc {
 		}
 
 		c.JSON(http.StatusNoContent, nil)
+	}
+}
+
+func (lc *LoanController) UpdateLoan() gin.HandlerFunc {
+	return func(c *gin.Context) {
+
+		status := c.Param("status")
+
+		accept := status == "accept"
+
+		loanID := c.Param("id")
+
+		if accept {
+			err := lc.LoanUseCase.AcceptLoan(c, loanID)
+
+			if err != nil {
+				c.Error(err)
+				return
+			}
+			c.JSON(http.StatusOK, gin.H{"message": "Loan Accepted"})
+			return
+		}
+
+		err := lc.LoanUseCase.RejectLoan(c, loanID)
+
+		if err != nil {
+			c.Error(err)
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{"message": "Loan Rejected"})
+
 	}
 }
