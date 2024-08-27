@@ -69,6 +69,13 @@ func (uu *userUsecase) UpdateUser(c context.Context, userID string, updatedUser 
 	return uu.userRepository.UpdateUser(ctx, userID, updatedUser)
 }
 
+func (uu *userUsecase) UpdateUserLoan(c context.Context, userID string, amount float64) error {
+	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
+	defer cancel()
+
+	return uu.userRepository.UpdateLoanAmount(ctx, userID, amount)
+}
+
 func (uu *userUsecase) DeleteUser(c context.Context, userID string) error {
 	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
 	defer cancel()

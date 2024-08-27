@@ -73,3 +73,26 @@ func (uc *loanUseCase) DeleteLoan(ctx context.Context, loanID string) error {
 
 	return nil
 }
+func (uc *loanUseCase) AcceptLoan(ctx context.Context, loanID string) error {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+
+	err := uc.loanRepository.AcceptLoan(c, loanID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (uc *loanUseCase) RejectLoan(ctx context.Context, loanID string) error {
+	c, cancel := context.WithTimeout(ctx, uc.contextTimeout)
+	defer cancel()
+
+	err := uc.loanRepository.RejectLoan(c, loanID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
