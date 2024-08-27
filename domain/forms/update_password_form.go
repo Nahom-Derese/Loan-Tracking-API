@@ -11,6 +11,10 @@ type ResetPasswordForm struct {
 	NewPassword string `json:"newPassword" validate:"required,min=6"`
 }
 
+type ForgotPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
 func (u *UpdatePasswordForm) Validate() error {
 	validate := bootstrap.GetValidator()
 	return validate.Struct(u)

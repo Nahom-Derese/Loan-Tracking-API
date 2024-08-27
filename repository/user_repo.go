@@ -130,16 +130,23 @@ func (ur *userRepository) GetUserByEmail(c context.Context, email string) (*enti
 func (ur *userRepository) GetUsers(c context.Context, filter bson.M, userFilter entities.UserFilter) (*[]entities.User, mongopagination.PaginationData, error) {
 	collection := ur.database.Collection(ur.collectionName)
 
-	projectQuery := bson.M{"$project": bson.M{
-		"password":     0,
-		"tokens":       0,
-		"verfiy_token": 0,
-		"is_owner":     0,
-	}}
-
 	var aggUserList []entities.User = make([]entities.User, 0)
 
-	paginatedData, err := mongopagination.New(collection).Context(c).Limit(userFilter.Limit).Page(userFilter.Pages).Aggregate(filter, projectQuery)
+	if userFilter.Limit == 0 {
+		userFilter.Limit = 10
+	}
+
+	if userFilter.Pages == 0 {
+		userFilter.Pages = 1
+	}
+
+	if filter == nil {
+		filter = bson.M{
+			"$match": bson.M{},
+		}
+	}
+
+	paginatedData, err := mongopagination.New(collection).Context(c).Limit(userFilter.Limit).Page(userFilter.Pages).Aggregate(filter)
 
 	if err != nil {
 		return &[]entities.User{}, mongopagination.PaginationData{}, custom_error.ErrFilteringUsers
@@ -241,22 +248,6 @@ func (ur *userRepository) IsUserActive(c context.Context, userID string) (bool, 
 	}
 	return user.Active, err
 
-}
-func (ur *userRepository) ResetUserPassword(c context.Context, userID string, resetPassword *forms.ResetPasswordForm) error {
-	collection := ur.database.Collection(ur.collectionName)
-	ObjID, err := primitive.ObjectIDFromHex(userID)
-
-	if err != nil {
-		return custom_error.ErrInvalidID
-	}
-	res, err := collection.UpdateOne(c, bson.M{"_id": ObjID}, bson.M{"$set": bson.M{"password": resetPassword.NewPassword}})
-	if res.MatchedCount < 1 {
-		return custom_error.ErrUserNotFound
-	}
-	if err != nil {
-		return custom_error.ErrErrorUpdatingUser
-	}
-	return nil
 }
 func (ur *userRepository) UpdateUserPassword(c context.Context, userID string, updatePassword string) error {
 	collection := ur.database.Collection(ur.collectionName)

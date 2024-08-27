@@ -21,4 +21,8 @@ func NewProfileRouter(env *bootstrap.Env, timeout time.Duration, db *mongo.Datab
 	}
 
 	group.GET("/profile", pc.GetProfile())
+
+	// admin functions
+	group.GET("/users", pc.GetProfiles())
+	group.DELETE("/users/:id", pc.DeleteProfile())
 }

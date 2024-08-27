@@ -1,6 +1,9 @@
 package custom_error
 
-import "errors"
+import (
+	"errors"
+	"net/http"
+)
 
 type ErrorResponse struct {
 	Error      ErrorMessage              `json:"error,omitempty"`
@@ -57,3 +60,34 @@ var (
 	ErrErrorUpdatingUser   = errors.New("error updating user")
 	ErrCredentialsNotValid = errors.New("credentials not valid")
 )
+
+var errorStatusMap = map[error]int{
+	ErrInvalidToken:                  http.StatusUnauthorized,
+	ErrUnauthorized:                  http.StatusUnauthorized,
+	ErrUserNotFound:                  http.StatusNotFound,
+	ErrUserNotVerified:               http.StatusUnauthorized,
+	ErrAlreadyVerified:               http.StatusBadRequest,
+	ErrUserAlreadyExists:             http.StatusBadRequest,
+	ErrUserNotActive:                 http.StatusForbidden,
+	ErrInvalidPasswordLength:         http.StatusBadRequest,
+	ErrErrorBindingRequest:           http.StatusBadRequest,
+	ErrErrorEncryptingPassword:       http.StatusInternalServerError,
+	ErrErrorCreatingUser:             http.StatusInternalServerError,
+	ErrErrorSendingVerificationEmail: http.StatusInternalServerError,
+	ErrInvalidEmailFormat:            http.StatusBadRequest,
+	EreInvalidRequestBody:            http.StatusBadRequest,
+	ErrRateLimitExceeded:             http.StatusTooManyRequests,
+	ErrErrorSendingReminderEmail:     http.StatusInternalServerError,
+	ErrInvalidID:                     http.StatusBadRequest,
+	ErrFilteringUsers:                http.StatusInternalServerError,
+	ErrTokenNotFound:                 http.StatusNotFound,
+	ErrErrorUpdatingUser:             http.StatusInternalServerError,
+	ErrCredentialsNotValid:           http.StatusUnauthorized,
+}
+
+func MapErrorToStatusCode(err error) int {
+	if statusCode, exists := errorStatusMap[err]; exists {
+		return statusCode
+	}
+	return http.StatusInternalServerError
+}

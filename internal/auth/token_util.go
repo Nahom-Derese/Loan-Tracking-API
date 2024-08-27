@@ -41,6 +41,7 @@ func CreateVerificationToken(user *entities.User, secret string, expiry int) (ac
 	}
 	return t, err
 }
+
 func CreateRefreshToken(user *entities.User, secret string, expiry int) (refreshToken string, err error) {
 	exp := time.Now().Add(time.Hour * time.Duration(expiry))
 	claimsRefresh := &entities.JwtCustomRefreshClaims{

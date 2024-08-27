@@ -188,13 +188,6 @@ func (pc *ProfileController) UpdateProfile() gin.HandlerFunc {
 func (pc *ProfileController) DeleteProfile() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		userID := c.Param("id")
-		claimUserID := c.MustGet("x-user-id").(string)
-		role := c.MustGet("x-user-role").(string)
-
-		if userID != claimUserID && role != "admin" {
-			c.JSON(http.StatusUnauthorized, custom_error.ErrMessage(custom_error.ErrUnauthorized))
-			return
-		}
 
 		err := pc.UserUsecase.DeleteUser(c, userID)
 

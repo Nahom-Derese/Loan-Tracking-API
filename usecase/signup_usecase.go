@@ -33,6 +33,24 @@ func (su *signupUsecase) ActivateUser(c context.Context, userID string) error {
 	defer cancel()
 	return su.userRepository.ActivateUser(ctx, userID)
 }
+
+func (uu *signupUsecase) FirstUser(c context.Context) (bool, error) {
+	ctx, cancel := context.WithTimeout(c, uu.contextTimeout)
+	defer cancel()
+
+	users, err := uu.userRepository.GetAllUsers(ctx)
+
+	if err != nil {
+		return false, err
+	}
+
+	if len(users) == 0 {
+		return true, nil
+	}
+
+	return false, nil
+}
+
 func (su *signupUsecase) Create(c context.Context, user *entities.User) (*entities.User, error) {
 
 	ctx, cancel := context.WithTimeout(c, su.contextTimeout)

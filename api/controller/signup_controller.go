@@ -82,6 +82,19 @@ func (sc *SignupController) Register(c *gin.Context) {
 		return
 	}
 
+	first, err := sc.SignupUsecase.FirstUser(c.Request.Context())
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, custom_error.ErrMessage(err))
+		return
+	}
+
+	var role = "user"
+
+	if first {
+		role = "admin"
+	}
+
 	_, err = sc.SignupUsecase.GetUserByEmail(c, request.Email)
 	if err == nil {
 		c.JSON(http.StatusConflict, custom_error.ErrMessage(custom_error.ErrUserAlreadyExists))
@@ -106,7 +119,7 @@ func (sc *SignupController) Register(c *gin.Context) {
 		Email:     request.Email,
 		Password:  request.Password,
 		Active:    false,
-		Role:      "user",
+		Role:      role,
 		Phone:     request.Phone,
 		Address:   request.Address,
 		CreatedAt: time.Now().Unix(),

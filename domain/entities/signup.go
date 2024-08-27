@@ -13,6 +13,7 @@ type SignupResponse struct {
 
 type SignupUsecase interface {
 	Create(c context.Context, user *User) (*User, error)
+	FirstUser(c context.Context) (bool, error)
 	ActivateUser(c context.Context, userID string) error
 	GetUserById(c context.Context, userId string) (*User, error)
 	GetUserByEmail(c context.Context, email string) (User, error)
