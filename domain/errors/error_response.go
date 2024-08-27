@@ -62,6 +62,7 @@ var (
 	ErrErrorCreatingLoan   = errors.New("error creating loan")
 	ErrLoanNotFound        = errors.New("loan not found")
 	ErrInvalidLoanAmount   = errors.New("invalid amount of loan")
+	ErrInvalidDate         = errors.New("invalid date")
 )
 
 var errorStatusMap = map[error]int{
