@@ -17,21 +17,22 @@ func Setup(env *bootstrap.Env, timeout time.Duration, db *mongo.Database, gin *g
 	// Error handling
 	gin.Use(middleware.ErrorHandlerMiddleware())
 
-	publicRouter := gin.Group("")
+	usersRouter := gin.Group("users")
 
 	// All Public APIs
-	NewSignupRouter(env, timeout, db, publicRouter)
-	NewLoginRouter(env, timeout, db, publicRouter)
-	NewRefreshTokenRouter(env, timeout, db, publicRouter)
-	NewPublicResetPasswordRouter(env, timeout, db, publicRouter)
+	NewSignupRouter(env, timeout, db, usersRouter)
+	NewLoginRouter(env, timeout, db, usersRouter)
+	NewRefreshTokenRouter(env, timeout, db, usersRouter)
+	NewPublicResetPasswordRouter(env, timeout, db, usersRouter)
 
-	// Static files
-	// NewPublicFileRouter(env, publicRouter)
+	protectedUserRouter := gin.Group("users")
+	protectedUserRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
 
-	protectedRouter := gin.Group("")
-	protectedRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
+	NewProfileRouter(env, timeout, db, protectedUserRouter)
 
-	// All Protected APIs
-	NewProfileRouter(env, timeout, db, protectedRouter)
+	adminRouter := gin.Group("admin")
+	adminRouter.Use(middleware.JwtAuthMiddleware(env.AccessTokenSecret))
+	adminRouter.Use(middleware.AdminMiddleware())
+
 	// NewLoansRouter(env, timeout, db, protectedRouter)
 }
