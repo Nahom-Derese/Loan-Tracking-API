@@ -15,9 +15,13 @@ func SendVerificationEmail(recipientEmail string, VerificationToken string, env 
 	smtpHost := env.SmtpHost
 	smtpPort := env.SmtpPort
 
+	baseUrl := env.ServerAddress
+
 	subject := "Subject: Account Verification\n"
 	mime := "MIME-Version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	url := fmt.Sprintf("http://localhost:8080/verify-email/%v", VerificationToken)
+	url := fmt.Sprintf("%v/users/verify-email/%v", baseUrl, VerificationToken)
+	// print the url
+	fmt.Println(url)
 	body := Emailtemplate(url)
 	message := []byte(subject + mime + "\n" + body)
 	auth := smtp.PlainAuth("", from, password, smtpHost)
